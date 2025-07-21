@@ -17,18 +17,17 @@ export const tokens = {
     body: "140%",
   },
 
-  fontSize: {
-    h1: "7rem", // 112pt
-    h05: "3rem", // 48pt
-    bodyL: "1.75rem", // 28pt
-    bodyS: "1rem", // 16pt
-    bodyXS: "0.875rem", // 14pt (same as bodyS)
+  // Design sizes for scaling calculations
+  designSizes: {
+    mobile: 375,
+    tablet: 1024,
+    desktop: 1440,
   },
 
   breakpoints: {
-    mobile: "500px",
-    tablet: "1024px",
-    desktop: "1440px",
+    mobile: "500px", // Mobile scaling stops, tablet begins
+    tablet: "1024px", // Tablet scaling stops, desktop begins
+    desktop: "1440px", // Desktop scaling stops, gutters begin
   },
 } as const;
 
@@ -45,75 +44,35 @@ export const colors = {
   orange: "#D87906",
 } as const;
 
-// Typography presets with exact specifications
-export const typography = {
-  h1: {
-    fontFamily: tokens.fontFamily.primary,
-    fontSize: tokens.fontSize.h1,
-    fontWeight: tokens.fontWeight.buch,
-    letterSpacing: tokens.letterSpacing.tight,
-    lineHeight: tokens.lineHeight.h1,
-  },
-
-  h05: {
-    fontFamily: tokens.fontFamily.primary,
-    fontSize: tokens.fontSize.h05,
-    fontWeight: tokens.fontWeight.buch,
-    letterSpacing: tokens.letterSpacing.tight,
-    lineHeight: tokens.lineHeight.h1,
-  },
-
-  bodyL: {
-    fontFamily: tokens.fontFamily.primary,
-    fontSize: tokens.fontSize.bodyL,
-    fontWeight: tokens.fontWeight.buch,
-    letterSpacing: tokens.letterSpacing.tight,
-    lineHeight: tokens.lineHeight.body,
-  },
-
-  bodyS: {
-    fontFamily: tokens.fontFamily.primary,
-    fontSize: tokens.fontSize.bodyS,
-    fontWeight: tokens.fontWeight.buch,
-    letterSpacing: tokens.letterSpacing.tight,
-    lineHeight: tokens.lineHeight.body,
-  },
-
-  bodyXS: {
-    fontFamily: tokens.fontFamily.primary,
-    fontSize: tokens.fontSize.bodyXS,
-    fontWeight: tokens.fontWeight.buch,
-    letterSpacing: tokens.letterSpacing.tight,
-    lineHeight: tokens.lineHeight.body,
-  },
-} as const;
-
 // Scaling utilities for viewport-based scaling
 export const scale = {
-  // Viewport-based scaling function
-  vw: (value: number, minSize?: number, maxSize?: number) => {
-    const vwValue = `${value}vw`;
-    if (minSize && maxSize) {
-      return `clamp(${minSize}rem, ${value}vw, ${maxSize}rem)`;
-    }
-    return vwValue;
+  // Calculate vw value based on design size and target size
+  vw: (targetSize: number, designSize: number) => {
+    return `${(targetSize / designSize) * 100}vw`;
   },
 
   // Responsive scaling with proper breakpoints
-  responsive: (mobile: string, tablet: string, desktop: string) => ({
-    // Mobile: scales with vw below 500px
-    fontSize: mobile,
-    // Tablet: 501px - 1024px
+  responsive: (
+    mobileSize: number,
+    tabletSize: number,
+    desktopSize: number
+  ) => ({
+    // Mobile: scales with vw below 500px (using mobile design size)
+    fontSize: `${(mobileSize / tokens.designSizes.mobile) * 100}vw`,
+
+    // Tablet: 501px - 1024px (using tablet design size)
     [`@media (min-width: ${tokens.breakpoints.mobile})`]: {
-      fontSize: tablet,
+      fontSize: `${(tabletSize / tokens.designSizes.tablet) * 100}vw`,
     },
-    // Desktop: 1025px - 1440px
+
+    // Desktop: 1025px - 1440px (using desktop design size)
     [`@media (min-width: ${tokens.breakpoints.tablet})`]: {
-      fontSize: desktop,
+      fontSize: `${(desktopSize / tokens.designSizes.desktop) * 100}vw`,
     },
+
     // Fullwidth: above 1440px (content stays at desktop size, gutters added)
     [`@media (min-width: ${tokens.breakpoints.desktop})`]: {
-      fontSize: desktop, // Keep desktop size, gutters handled by layout
+      fontSize: `${desktopSize}px`, // Fixed pixel size for large screens
     },
   }),
 
@@ -122,20 +81,59 @@ export const scale = {
     `clamp(${minSize}, ${scaleValue}vw, ${maxSize})`,
 };
 
+// Typography presets with exact specifications
+export const typography = {
+  h1: {
+    fontFamily: tokens.fontFamily.primary,
+    fontWeight: tokens.fontWeight.buch,
+    letterSpacing: tokens.letterSpacing.tight,
+    lineHeight: tokens.lineHeight.h1,
+    ...scale.responsive(112, 112, 112), // 112px = 7rem equivalent
+  },
+
+  h05: {
+    fontFamily: tokens.fontFamily.primary,
+    fontWeight: tokens.fontWeight.buch,
+    letterSpacing: tokens.letterSpacing.tight,
+    lineHeight: tokens.lineHeight.h1,
+    ...scale.responsive(48, 48, 48), // 48px = 3rem equivalent
+  },
+
+  bodyL: {
+    fontFamily: tokens.fontFamily.primary,
+    fontWeight: tokens.fontWeight.buch,
+    letterSpacing: tokens.letterSpacing.tight,
+    lineHeight: tokens.lineHeight.body,
+    ...scale.responsive(28, 28, 28), // 28px = 1.75rem equivalent
+  },
+
+  bodyS: {
+    fontFamily: tokens.fontFamily.primary,
+    fontWeight: tokens.fontWeight.buch,
+    letterSpacing: tokens.letterSpacing.tight,
+    lineHeight: tokens.lineHeight.body,
+    ...scale.responsive(16, 16, 16), // 16px = 1rem equivalent
+  },
+
+  bodyXS: {
+    fontFamily: tokens.fontFamily.primary,
+    fontWeight: tokens.fontWeight.buch,
+    letterSpacing: tokens.letterSpacing.tight,
+    lineHeight: tokens.lineHeight.body,
+    ...scale.responsive(14, 14, 14), // 14px = 0.875rem equivalent
+  },
+} as const;
+
 // Utility functions for styled-components
 export const applyTypography = (variant: keyof typeof typography) =>
   typography[variant];
 
-export const applyScale = (
-  scaleValue: number,
-  minSize?: number,
-  maxSize?: number
-) => ({
-  fontSize: scale.vw(scaleValue, minSize, maxSize),
+export const applyScale = (targetSize: number, designSize: number) => ({
+  fontSize: scale.vw(targetSize, designSize),
 });
 
 export const applyResponsiveScale = (
-  mobile: string,
-  tablet: string,
-  desktop: string
-) => scale.responsive(mobile, tablet, desktop);
+  mobileSize: number,
+  tabletSize: number,
+  desktopSize: number
+) => scale.responsive(mobileSize, tabletSize, desktopSize);

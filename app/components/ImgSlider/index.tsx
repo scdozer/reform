@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { SmoothEase, NoEase, NaturalEase } from "@/utils/gsap";
+import { ResponsiveContainer } from "@/app/styles/LayoutComponents";
 import Image from "next/image";
 import gsap from "gsap";
 
@@ -134,22 +135,28 @@ export default function ImgSlider() {
   }, []);
 
   return (
-    <S.ImgSliderContainer>
-      {cardDataRef.current.map((card, pos) => (
-        <S.ImgSliderCard
-          key={`card-${pos}`}
-          ref={(el) => {
-            cardsRef.current[pos] = el;
-          }}
-        >
-          <Image
-            src={images[card.imgIndex]}
-            alt={`Insurance Card ${card.imgIndex + 1}`}
-            width={CARD_WIDTH}
-            height={CARD_HEIGHT}
-          />
-        </S.ImgSliderCard>
-      ))}
-    </S.ImgSliderContainer>
+    <ResponsiveContainer
+      $mobilePadding={0}
+      $tabletPadding={0}
+      $desktopPadding={0}
+    >
+      <S.ImgSliderContainer>
+        {cardDataRef.current.map((card, pos) => (
+          <S.ImgSliderCard
+            key={`card-${pos}`}
+            ref={(el) => {
+              cardsRef.current[pos] = el;
+            }}
+          >
+            <Image
+              src={images[card.imgIndex]}
+              alt={`Insurance Card ${card.imgIndex + 1}`}
+              width={CARD_WIDTH}
+              height={CARD_HEIGHT}
+            />
+          </S.ImgSliderCard>
+        ))}
+      </S.ImgSliderContainer>
+    </ResponsiveContainer>
   );
 }

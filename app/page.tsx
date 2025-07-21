@@ -10,9 +10,9 @@ export default function Home() {
   return (
     <LayoutContainer>
       <ResponsiveContainer
-        $mobilePadding="1rem"
-        $tabletPadding="2rem"
-        $desktopPadding="3rem"
+        $mobilePadding={24}
+        $tabletPadding={32}
+        $desktopPadding={32}
       >
         <Hero />
         <HeroBlocks />
