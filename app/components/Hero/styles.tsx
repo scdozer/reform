@@ -9,7 +9,6 @@ export const H1 = styled.h1`
     text-align: center;
     ${media.mobile} {
       ${toCssString(typography.h05)}
-
       max-width: 343px;
     }
     ${media.tablet} {

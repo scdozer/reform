@@ -64,18 +64,8 @@ export default function ImgSlider() {
   }, [cardData, direction]);
 
   const updateCardImages = useCallback(() => {
-    cardData.forEach((_, pos) => {
-      const card = cardsRef.current[pos];
-      if (!card) return;
-      const img = card.querySelector("img");
-      if (!img) return;
-      const imgIndex =
-        (currentIndexRef.current - (pos - 1) + images.length) % images.length;
-      img.src = images[imgIndex];
-      img.alt = `Insurance Card ${imgIndex + 1}`;
-    });
     gsap.set(cardsRef.current[1], { scale: 1 });
-  }, [cardData]);
+  }, []);
 
   // Animate to next card (reverse direction)
   const animateSlider = useCallback(() => {
@@ -169,20 +159,7 @@ export default function ImgSlider() {
           }}
           $isTablet={direction === "y"}
         >
-          <Image
-            src={
-              images[
-                (currentIndexRef.current - (pos - 1) + images.length) %
-                  images.length
-              ]
-            }
-            alt={`Insurance Card ${
-              ((currentIndexRef.current - (pos - 1) + images.length) %
-                images.length) +
-              1
-            }`}
-            fill
-          />
+          <Image src={images[0]} alt="Insurance Card" fill />
         </S.ImgSliderCard>
       ))}
     </S.ImgSliderContainer>
