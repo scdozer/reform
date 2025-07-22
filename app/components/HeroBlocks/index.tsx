@@ -1,7 +1,7 @@
+import * as S from "./styles";
+
 import ImgSlider from "@/c/ImgSlider";
 import Button from "@/c/Button";
-
-import * as S from "./styles";
 
 export default function HeroBlocks() {
   return (

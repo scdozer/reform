@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import styled from "styled-components";
-import { scaleStyle } from "@/utils/responsive";
 
+import { scaleStyle } from "@/utils/responsive";
 import { media } from "@/app/styles/vars";
 
 const ContainerWrap = styled.div`

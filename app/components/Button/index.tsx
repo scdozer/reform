@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { ArrowsBorder, Next } from "@/c/SVGs/Arrows";
 import gsap from "gsap";
 
 import * as S from "./styles";
+
+import { ArrowsBorder, Next } from "@/c/SVGs/Arrows";
 
 export default function Button() {
   const buttonRef = useRef<HTMLButtonElement>(null);

@@ -2,9 +2,10 @@
 
 import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
-import * as S from "./styles";
 
+import * as S from "./styles";
 import { colors } from "@/app/styles/vars";
+
 import Marquee from "../Marquee";
 
 export default function Hero() {

@@ -119,7 +119,6 @@ export default function ImgSlider() {
     );
   }, [direction, updateCardImages, resetCardTransforms]);
 
-  // Full reset on mount, resize, or direction change
   useEffect(() => {
     const cards = cardsRef.current;
     const interval = intervalRef.current;
@@ -133,7 +132,6 @@ export default function ImgSlider() {
     if (interval) clearInterval(interval);
     if (timeout) clearTimeout(timeout);
 
-    // Reset transforms and images immediately
     resetCardTransforms();
     updateCardImages();
 

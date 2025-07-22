@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+
 import * as S from "./styles";
 
 import MarqueeItems from "./Items";
