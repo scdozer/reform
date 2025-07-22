@@ -1,61 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState, useLayoutEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ArrowsBorder, Next } from "@/c/SVGs/Arrows";
 import gsap from "gsap";
 
 import * as S from "./styles";
-
-function SVGWrappedText({
-  text,
-  textRef,
-}: {
-  text: string;
-  textRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  //to make sure there is a .75px border on the text
-
-  const [textWidth, setTextWidth] = useState(0);
-  const textMeasureRef = useRef<HTMLSpanElement>(null);
-  const horizontalPadding = 39;
-  const borderRadius = 25;
-  const svgHeight = 50;
-
-  useLayoutEffect(() => {
-    if (textMeasureRef.current) {
-      setTextWidth(textMeasureRef.current.offsetWidth);
-    }
-  }, [text]);
-
-  return (
-    <S.TextWrapper
-      $width={textWidth + horizontalPadding}
-      $height={svgHeight}
-      $radius={borderRadius}
-      ref={textRef}
-    >
-      <S.TextContent>{text}</S.TextContent>
-      <S.TextBorderSVG
-        width={textWidth + horizontalPadding}
-        height={svgHeight}
-        viewBox={`0 0 ${textWidth + horizontalPadding} ${svgHeight}`}
-        $radius={borderRadius}
-      >
-        <rect
-          x="0.375"
-          y="0.375"
-          width={textWidth + horizontalPadding - 0.75}
-          height={svgHeight - 0.75}
-          rx={borderRadius}
-          strokeWidth="0.75"
-          fill="none"
-        />
-      </S.TextBorderSVG>
-      {/* Hidden span for measuring text width */}
-      <S.HiddenTextMeasure ref={textMeasureRef}>{text}</S.HiddenTextMeasure>
-    </S.TextWrapper>
-  );
-}
 
 export default function Button() {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -75,24 +24,24 @@ export default function Button() {
     if (hovered) {
       gsap.to(textRef.current, {
         x: arrowWidth + gap,
-        duration: 0.4,
-        ease: "power2.in",
+        duration: 0.15,
+        ease: "power2.out",
       });
       gsap.to(arrowsRef.current, {
         x: -(textWidth + gap),
-        duration: 0.4,
-        ease: "power2.in",
+        duration: 0.05,
+        ease: "power2.out",
       });
     } else {
       gsap.to(textRef.current, {
         x: 0,
-        duration: 0.4,
-        ease: "power2.in",
+        duration: 0.15,
+        ease: "power2.out",
       });
       gsap.to(arrowsRef.current, {
         x: 0,
-        duration: 0.4,
-        ease: "power2.in",
+        duration: 0.05,
+        ease: "power2.out",
       });
     }
   }, [hovered]);
@@ -127,7 +76,8 @@ export default function Button() {
       onMouseDown={() => setActive(true)}
       onMouseUp={() => setActive(false)}
     >
-      <SVGWrappedText text={buttonText} textRef={textRef} />
+      <S.TextContent ref={textRef}>{buttonText}</S.TextContent>
+
       <S.Arrows ref={arrowsRef}>
         <S.ArrowsBorder ref={arrowsBorderRef}>
           <ArrowsBorder />

@@ -1,15 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { SmoothEase, NoEase, NaturalEase } from "@/utils/gsap";
-import { ResponsiveContainer } from "@/app/styles/LayoutComponents";
+import { useRef, useEffect, useMemo, useCallback, useState } from "react";
+import { NaturalEase } from "@/utils/gsap";
 import Image from "next/image";
 import gsap from "gsap";
 
 import * as S from "./styles";
 
-const CARD_WIDTH = 493;
-const CARD_HEIGHT = 244;
 const SLIDE_INTERVAL = 7000;
 const ANIMATION_DURATION = 0.9;
 
@@ -22,73 +19,86 @@ const images = [
   "/img/insurance-card.png",
 ];
 
+function getDirection(width: number) {
+  return width >= 501 && width <= 1024 ? "y" : "x";
+}
+
 export default function ImgSlider() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const currentIndexRef = useRef(0);
-  const cardDataRef = useRef([
-    { imgIndex: 0, position: 0 },
-    { imgIndex: 1, position: 1 },
-    { imgIndex: 2, position: 2 },
-    { imgIndex: 3, position: 3 },
-  ]);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
 
-  const updateCardImages = () => {
-    cardDataRef.current.forEach((card, pos) => {
-      const cardElement = cardsRef.current[pos];
-      if (cardElement) {
-        const imgElement = cardElement.querySelector("img");
-        if (imgElement) {
-          const imgIndex = (currentIndexRef.current + pos) % images.length;
-          imgElement.src = images[imgIndex];
-          imgElement.alt = `Insurance Card ${imgIndex + 1}`;
-        }
-      }
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Card data: 4 visible cards (left-peek, center, right-peek, next)
+  const cardData = useMemo(() => [0, 1, 2, 3], []);
+
+  const direction = getDirection(windowWidth);
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowWidth(window.innerWidth);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Reset all card positions and scales
+  const resetCardTransforms = useCallback(() => {
+    cardData.forEach((_, pos) => {
+      const card = cardsRef.current[pos];
+      if (!card) return;
+      const offset = pos - 1; // -1, 0, +1, +2
+      const scale = 0.8;
+      const transform =
+        direction === "x"
+          ? { xPercent: -offset * 100, yPercent: 0, scale }
+          : { xPercent: 0, yPercent: -offset * 100, scale };
+      gsap.set(card, transform);
     });
-  };
+  }, [cardData, direction]);
 
-  const resetCardPositions = () => {
-    cardDataRef.current.forEach((card, pos) => {
-      const cardElement = cardsRef.current[pos];
-      if (cardElement) {
-        let x = 0;
-        let scale = 1;
-
-        switch (pos) {
-          case 0:
-            x = -CARD_WIDTH;
-            scale = 0.8;
-            break;
-          case 1:
-            x = 0;
-            scale = 1;
-            break;
-          case 2:
-            x = CARD_WIDTH;
-            scale = 0.8;
-            break;
-          default:
-            x = -CARD_WIDTH * 2;
-            scale = 0.8;
-            break;
-        }
-
-        gsap.set(cardElement, {
-          x,
-          scale,
-        });
-      }
+  const updateCardImages = useCallback(() => {
+    cardData.forEach((_, pos) => {
+      const card = cardsRef.current[pos];
+      if (!card) return;
+      const img = card.querySelector("img");
+      if (!img) return;
+      const imgIndex =
+        (currentIndexRef.current - (pos - 1) + images.length) % images.length;
+      img.src = images[imgIndex];
+      img.alt = `Insurance Card ${imgIndex + 1}`;
     });
-  };
+    gsap.set(cardsRef.current[1], { scale: 1 });
+  }, [cardData]);
 
-  const animateSlider = () => {
+  // Animate to next card (reverse direction)
+  const animateSlider = useCallback(() => {
+    const move =
+      direction === "x" ? { xPercent: "+=100" } : { yPercent: "+=100" };
+
     const tl = gsap.timeline({
       onComplete: () => {
-        currentIndexRef.current = (currentIndexRef.current + 1) % images.length;
+        currentIndexRef.current =
+          (currentIndexRef.current - 1 + images.length) % images.length;
         updateCardImages();
-        resetCardPositions();
+        resetCardTransforms();
+        const centerCard = cardsRef.current[1];
+        if (centerCard) {
+          gsap.to(centerCard, {
+            scale: 1,
+            duration: ANIMATION_DURATION,
+            ease: NaturalEase,
+          });
+        }
       },
     });
+    timelineRef.current = tl;
 
     if (cardsRef.current[1]) {
       tl.to(cardsRef.current[1], {
@@ -101,62 +111,82 @@ export default function ImgSlider() {
     tl.to(
       cardsRef.current,
       {
-        x: `+=${CARD_WIDTH}`,
+        ...move,
         duration: 2.71,
         ease: NaturalEase,
       },
       ">"
     );
+  }, [direction, updateCardImages, resetCardTransforms]);
 
-    tl.to(
-      cardsRef.current[0],
-      {
-        scale: 1,
-        duration: ANIMATION_DURATION,
-        ease: NaturalEase,
-      },
-      ">"
-    );
-  };
-
+  // Full reset on mount, resize, or direction change
   useEffect(() => {
-    resetCardPositions();
+    const cards = cardsRef.current;
+    const interval = intervalRef.current;
+    const timeout = timeoutRef.current;
+
+    gsap.killTweensOf(cards);
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+      timelineRef.current = null;
+    }
+    if (interval) clearInterval(interval);
+    if (timeout) clearTimeout(timeout);
+
+    // Reset transforms and images immediately
+    resetCardTransforms();
     updateCardImages();
 
     animateSlider();
-
     intervalRef.current = setInterval(animateSlider, SLIDE_INTERVAL);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+      gsap.killTweensOf(cards);
+      if (timelineRef.current) {
+        timelineRef.current.kill();
+        timelineRef.current = null;
       }
     };
-  }, []);
+  }, [
+    animateSlider,
+    direction,
+    resetCardTransforms,
+    updateCardImages,
+    windowWidth,
+  ]);
 
   return (
-    <ResponsiveContainer
-      $mobilePadding={0}
-      $tabletPadding={0}
-      $desktopPadding={0}
+    <S.ImgSliderContainer
+      ref={containerRef}
+      $isTablet={direction === "y"}
+      key={direction + windowWidth}
     >
-      <S.ImgSliderContainer>
-        {cardDataRef.current.map((card, pos) => (
-          <S.ImgSliderCard
-            key={`card-${pos}`}
-            ref={(el) => {
-              cardsRef.current[pos] = el;
-            }}
-          >
-            <Image
-              src={images[card.imgIndex]}
-              alt={`Insurance Card ${card.imgIndex + 1}`}
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
-            />
-          </S.ImgSliderCard>
-        ))}
-      </S.ImgSliderContainer>
-    </ResponsiveContainer>
+      {cardData.map((_, pos) => (
+        <S.ImgSliderCard
+          key={`card-${pos}`}
+          ref={(el) => {
+            cardsRef.current[pos] = el;
+          }}
+          $isTablet={direction === "y"}
+        >
+          <Image
+            src={
+              images[
+                (currentIndexRef.current - (pos - 1) + images.length) %
+                  images.length
+              ]
+            }
+            alt={`Insurance Card ${
+              ((currentIndexRef.current - (pos - 1) + images.length) %
+                images.length) +
+              1
+            }`}
+            fill
+          />
+        </S.ImgSliderCard>
+      ))}
+    </S.ImgSliderContainer>
   );
 }

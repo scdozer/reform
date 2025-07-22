@@ -9,7 +9,7 @@ export const metadata = {
 const soehne = localFont({
   src: "../public/fonts/soehne-buch.woff2",
   variable: "--font-soehne-buch",
-  display: "swap",
+  // display: "swap",
 });
 
 export default function RootLayout({
