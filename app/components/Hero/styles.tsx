@@ -10,8 +10,6 @@ export const H1 = styled.h1`
     ${media.mobile} {
       ${toCssString(typography.h05)}
 
-      padding-top: 94px;
-      padding-bottom: 70px;
       max-width: 343px;
     }
     ${media.tablet} {
@@ -34,9 +32,7 @@ export const AnimSpan = styled.span`
   display: inline-block;
 `;
 
-export const HiddenSpace = styled.span`
-  display: none;
-`;
+export const HiddenSpace = styled.span``;
 
 export const Desktop = styled(H1)`
   ${media.desktop} {
@@ -56,6 +52,15 @@ export const Mobile = styled(H1)`
   display: none;
 
   ${media.mobile} {
+    ${scaleStyle(`
     display: block;
+    min-height: 392px;
+    max-height: 392px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    `)}
   }
 `;

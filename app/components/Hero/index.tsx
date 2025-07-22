@@ -30,11 +30,11 @@ export default function Hero() {
   const renderContent = () => (
     <div ref={heroRef}>
       <S.Desktop>
-        Health insurance that <S.AnimSpan>doesn&apos;t</S.AnimSpan>
-        <S.AnimSpan> get in</S.AnimSpan>
-        {showSpace && <span>&nbsp;</span>}
+        Health insurance that <S.AnimSpan>doesn&apos;t</S.AnimSpan>{" "}
+        <S.AnimSpan>get</S.AnimSpan> <S.AnimSpan>in</S.AnimSpan>
+        {showSpace && <S.HiddenSpace>&nbsp;</S.HiddenSpace>}
         <Marquee />
-        <S.AnimSpan>the way.</S.AnimSpan>
+        <S.AnimSpan>the</S.AnimSpan> <S.AnimSpan>way.</S.AnimSpan>
       </S.Desktop>
       <S.Tablet>
         Health insurance
@@ -43,14 +43,15 @@ export default function Hero() {
         <br />
         <S.AnimSpan>get in</S.AnimSpan>
         <Marquee />
-        {showSpace && <span>&nbsp;</span>}
+        {showSpace && <S.HiddenSpace>&nbsp;</S.HiddenSpace>}
         <S.AnimSpan>the way.</S.AnimSpan>
       </S.Tablet>
       <S.Mobile>
         Health insurance
         <br />
-        that <S.AnimSpan>doesn&apos;t get</S.AnimSpan>
-        <br />
+        <div>
+          that <S.AnimSpan>doesn&apos;t get</S.AnimSpan>
+        </div>
         <Marquee />
         <S.AnimSpan>in the way.</S.AnimSpan>
       </S.Mobile>

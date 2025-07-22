@@ -7,8 +7,8 @@ export const tokens = {
     buch: "400",
   },
   letterSpacing: {
-    tight: "-3%",
-    wide: "10%",
+    tight: "-0.03em",
+    wide: "0.1em",
   },
   lineHeight: {
     h1: "120%",

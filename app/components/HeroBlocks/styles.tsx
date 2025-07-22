@@ -17,7 +17,6 @@ export const HeroBlocksContainer = styled.div`
 
     ${media.mobile} {
      grid-template-columns: repeat(6, 1fr);
-     margin: 0 8px;
     }
   `)}
 `;
