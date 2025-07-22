@@ -27,14 +27,22 @@ export default function Hero() {
     return () => clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setShowSpace(true);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const renderContent = () => (
     <div ref={heroRef}>
       <S.Desktop>
         Health insurance that <S.AnimSpan>doesn&apos;t</S.AnimSpan>{" "}
-        <S.AnimSpan>get</S.AnimSpan> <S.AnimSpan>in</S.AnimSpan>
+        <S.AnimSpan>get in</S.AnimSpan>
         {showSpace && <S.HiddenSpace>&nbsp;</S.HiddenSpace>}
         <Marquee />
-        <S.AnimSpan>the</S.AnimSpan> <S.AnimSpan>way.</S.AnimSpan>
+        <S.AnimSpan>the way.</S.AnimSpan>
       </S.Desktop>
       <S.Tablet>
         Health insurance
